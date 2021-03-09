@@ -4,10 +4,10 @@
 #include <omp.h>
 using namespace std;
 
-double determinant(int dim, double** matrix);
-double determinantTest(int dim, int dimStart, double** matrix);
+float determinant(int dim, float** matrix);
+float determinantTest(int dim, int dimStart, float** matrix);
 
-double determinantMultithread(int dim, int dimStart, double** matrix);
+float determinantMultithread(int dim, int dimStart, float** matrix);
 
 int main()
 {
@@ -18,24 +18,43 @@ int main()
 	char* buf = new char[size + 1];
 	in.read(buf, size);
 	buf[size] = 0;
-	char* bufIterator = buf + 3;
+	char* bufIterator = buf;
 	string tempString = "";
 
 	cout << buf << endl;
 
-	double** table;    // указатель для блока памяти для массива указателей
-	double* rows;      // указатель для блока памяти для хранения информации по строкам
+	float** table;    // указатель для блока памяти для массива указателей
+	float* rows;      // указатель для блока памяти для хранения информации по строкам
+	int rowsCount = 0;
+	
+	while(rowsCount == 0)
+	{
+		if(*bufIterator != ' ' && (int)*bufIterator != 13 && (int)*bufIterator != 10 && *bufIterator != '\0')
+		{
+			tempString += *bufIterator;
+			bufIterator++;
+		}
+		else
+		{
+			rowsCount = stod(tempString);
+			bufIterator += 2;
+		}
 
-	int rowsCount = (int)buf[0] - 48;  // количество строк
+
+		
+		//rowsCount = (int)buf[0] - 48;  // количество строк
 	//сделать проверку
+	}
+
+	tempString = "";
 
 	// выделяем память для двухмерного массива
-	table = (double**)calloc(rowsCount, sizeof(double*));
-	//rows = (double*) malloc(sizeof(double) * rowscount);
+	table = (float**)calloc(rowsCount, sizeof(float*));
+	//rows = (float*) malloc(sizeof(float) * rowscount);
 
 	for (int i = 0; i < rowsCount; i++)
 	{
-		table[i] = (double*)calloc(rowsCount, sizeof(double));//table[i] - это сам указатель на будущий массив под элементы
+		table[i] = (float*)calloc(rowsCount, sizeof(float));//table[i] - это сам указатель на будущий массив под элементы
 
 		int j = 0;
 		while (j != rowsCount)
@@ -71,15 +90,24 @@ int main()
 		   }
 	   }*/
 
+	float start_time, end_time, tick;
+	start_time = omp_get_wtime();
+	
+	//auto single = determinant(rowsCount, table);
+	end_time = omp_get_wtime();
 
-	auto single = determinant(rowsCount, table);
+	auto res1 = end_time - start_time;
 
-	//auto test = determinantTest(rowsCount, rowsCount, table);
+	start_time = omp_get_wtime();
+	//auto test = determinantTest(rowsCount, rowsCount, table);//работает быстрее, чем просто determinant
+	//omp_set_num_threads(8);
 	auto multi = determinantMultithread(rowsCount, rowsCount, table);
+	end_time = omp_get_wtime();
 
+	auto res2 = end_time - start_time;
 
-	printf("Single: %f", single);
-	printf("Multi: %f", multi);
+	//printf("Single: %f\n", single);
+	//printf("Multi: %f\n", multi);
 	
 	int c = 5;
 
@@ -88,9 +116,9 @@ int main()
 
 }
 
-double determinant(int dim, double** matrix)
+float determinant(int dim, float** matrix)
 {
-	double res = 0.0;
+	float res = 0.0;
 
 	if (dim == 2)
 	{
@@ -101,13 +129,13 @@ double determinant(int dim, double** matrix)
 
 		for (int i = 0; i < dim; i++)
 		{
-			double resFor = 0.0;
+			float resFor = 0.0;
 			int dimLoc = dim - 1;
-			double** matrixLocal = (double**)calloc(dimLoc, sizeof(double*));
+			float** matrixLocal = (float**)calloc(dimLoc, sizeof(float*));
 
 			for (int im = 0; im < dimLoc; im++)
 			{
-				matrixLocal[im] = (double*)calloc(dimLoc, sizeof(double));
+				matrixLocal[im] = (float*)calloc(dimLoc, sizeof(float));
 
 				int ifContinue = 0;
 
@@ -137,7 +165,7 @@ double determinant(int dim, double** matrix)
 			}
 
 
-			for (int i = 0; i < dimLoc; i++)
+			/*for (int i = 0; i < dimLoc; i++)
 			{
 				printf("\n");
 
@@ -145,7 +173,7 @@ double determinant(int dim, double** matrix)
 				{
 					printf("%f \t", matrixLocal[i][j]);
 				}
-			}
+			}*/
 
 
 			int sign = -1;//если false знак '-', если true знак '+'
@@ -168,10 +196,10 @@ double determinant(int dim, double** matrix)
 
 
 
-double determinantMultithread(int dim, int dimStart, double** matrix)
+float determinantMultithread(int dim, int dimStart, float** matrix)
 {
 
-	double res = 0.0;
+	float res = 0.0;
 
 	if (dim == dimStart)
 	{
@@ -181,16 +209,16 @@ double determinantMultithread(int dim, int dimStart, double** matrix)
 
 
 			int i = 0;
-#pragma omp for
+#pragma omp for 
 			for (i = 0; i < dim; i++)
 			{
-				double resFor = 0.0;
+				float resFor = 0.0;
 				int dimLoc = dim - 1;
-				double** matrixLocal = (double**)calloc(dimLoc, sizeof(double*));
+				float** matrixLocal = (float**)calloc(dimLoc, sizeof(float*));
 
 				for (int im = 0; im < dimLoc; im++)
 				{
-					matrixLocal[im] = (double*)calloc(dimLoc, sizeof(double));
+					matrixLocal[im] = (float*)calloc(dimLoc, sizeof(float));
 
 					int ifContinue = 0;
 
@@ -220,7 +248,7 @@ double determinantMultithread(int dim, int dimStart, double** matrix)
 				}
 
 
-				for (int i = 0; i < dimLoc; i++)
+				/*for (int i = 0; i < dimLoc; i++)
 				{
 					printf("\n");
 
@@ -228,7 +256,7 @@ double determinantMultithread(int dim, int dimStart, double** matrix)
 					{
 						printf("%f \t", matrixLocal[i][j]);
 					}
-				}
+				}*/
 
 
 				int sign = -1;//если false знак '-', если true знак '+'
@@ -257,17 +285,17 @@ double determinantMultithread(int dim, int dimStart, double** matrix)
 		}
 		else
 		{
-			double resLoc = 0.0;
+			float resLoc = 0.0;
 
 			for (int i = 0; i < dim; i++)
 			{
-				double resFor = 0.0;
+				float resFor = 0.0;
 				int dimLoc = dim - 1;
-				double** matrixLocal = (double**)calloc(dimLoc, sizeof(double*));
+				float** matrixLocal = (float**)calloc(dimLoc, sizeof(float*));
 
 				for (int im = 0; im < dimLoc; im++)
 				{
-					matrixLocal[im] = (double*)calloc(dimLoc, sizeof(double));
+					matrixLocal[im] = (float*)calloc(dimLoc, sizeof(float));
 
 					int ifContinue = 0;
 
@@ -297,7 +325,7 @@ double determinantMultithread(int dim, int dimStart, double** matrix)
 				}
 
 
-				for (int i = 0; i < dimLoc; i++)
+				/*for (int i = 0; i < dimLoc; i++)
 				{
 					printf("\n");
 
@@ -305,7 +333,7 @@ double determinantMultithread(int dim, int dimStart, double** matrix)
 					{
 						printf("%f \t", matrixLocal[i][j]);
 					}
-				}
+				}*/
 
 
 				int sign = -1;//если false знак '-', если true знак '+'
@@ -318,7 +346,7 @@ double determinantMultithread(int dim, int dimStart, double** matrix)
 				auto d = matrix[0][i];
 
 
-				resFor = sign * matrix[0][i] * determinantTest(dim - 1, dim, matrixLocal);
+				resFor = sign * matrix[0][i] * determinantMultithread(dim - 1, dim, matrixLocal);
 				resLoc += resFor;
 			}
 			return resLoc;
@@ -330,21 +358,21 @@ double determinantMultithread(int dim, int dimStart, double** matrix)
 	return res;
 }
 
-double determinantTest(int dim, int dimStart, double** matrix)
+float determinantTest(int dim, int dimStart, float** matrix)
 {
-	double res = 0.0;
+	float res = 0.0;
 
 	if (dim == dimStart)
 	{
 		for (int i = 0; i < dim; i++)
 		{
-			double resFor = 0.0;
+			float resFor = 0.0;
 			int dimLoc = dim - 1;
-			double** matrixLocal = (double**)calloc(dimLoc, sizeof(double*));
+			float** matrixLocal = (float**)calloc(dimLoc, sizeof(float*));
 
 			for (int im = 0; im < dimLoc; im++)
 			{
-				matrixLocal[im] = (double*)calloc(dimLoc, sizeof(double));
+				matrixLocal[im] = (float*)calloc(dimLoc, sizeof(float));
 
 				int ifContinue = 0;
 
@@ -374,15 +402,15 @@ double determinantTest(int dim, int dimStart, double** matrix)
 			}
 
 
-			for (int i = 0; i < dimLoc; i++)
-			{
-				printf("\n");
+			//for (int i = 0; i < dimLoc; i++)
+			//{
+			//	printf("\n");
 
-				for (int j = 0; j < dimLoc; j++)
-				{
-					printf("%f \t", matrixLocal[i][j]);
-				}
-			}
+			//	for (int j = 0; j < dimLoc; j++)
+			//	{
+			//		printf("%f \t", matrixLocal[i][j]);
+			//	}
+			//}
 
 
 			int sign = -1;//если false знак '-', если true знак '+'
@@ -397,6 +425,7 @@ double determinantTest(int dim, int dimStart, double** matrix)
 
 			resFor = sign * matrix[0][i] * determinantTest(dim - 1, dim, matrixLocal);
 			res += resFor;
+			free(matrixLocal);
 		}
 	}
 	else
@@ -405,20 +434,22 @@ double determinantTest(int dim, int dimStart, double** matrix)
 		if (dim == 2)
 		{
 			return res = matrix[0][0] * matrix[1][1] - matrix[1][0] * matrix[0][1];
+			
+			 
 		}
 		else
 		{
-			double resLoc = 0.0;
-
+			float resLoc = 0.0;
+			float** matrixLocal = NULL;
 			for (int i = 0; i < dim; i++)
 			{
-				double resFor = 0.0;
+				float resFor = 0.0;
 				int dimLoc = dim - 1;
-				double** matrixLocal = (double**)calloc(dimLoc, sizeof(double*));
+				matrixLocal = (float**)calloc(dimLoc, sizeof(float*));
 
 				for (int im = 0; im < dimLoc; im++)
 				{
-					matrixLocal[im] = (double*)calloc(dimLoc, sizeof(double));
+					matrixLocal[im] = (float*)calloc(dimLoc, sizeof(float));
 
 					int ifContinue = 0;
 
@@ -448,15 +479,15 @@ double determinantTest(int dim, int dimStart, double** matrix)
 				}
 
 
-				for (int i = 0; i < dimLoc; i++)
-				{
-					printf("\n");
+				//for (int i = 0; i < dimLoc; i++)
+				//{
+				//	printf("\n");
 
-					for (int j = 0; j < dimLoc; j++)
-					{
-						printf("%f \t", matrixLocal[i][j]);
-					}
-				}
+				//	for (int j = 0; j < dimLoc; j++)
+				//	{
+				//		printf("%f \t", matrixLocal[i][j]);
+				//	}
+				//}
 
 
 				int sign = -1;//если false знак '-', если true знак '+'
@@ -466,12 +497,15 @@ double determinantTest(int dim, int dimStart, double** matrix)
 				}
 
 
-				auto d = matrix[0][i];
+				//auto d = matrix[0][i];
 
 
 				resFor = sign * matrix[0][i] * determinantTest(dim - 1, dim, matrixLocal);
 				resLoc += resFor;
+
+				free(matrixLocal);
 			}
+			
 			return resLoc;
 		}
 	}
