@@ -99,15 +99,16 @@ int main()
 	auto res1 = end_time - start_time;
 
 	start_time = omp_get_wtime();
-	//auto test = determinantTest(rowsCount, rowsCount, table);//работает быстрее, чем просто determinant
+	auto test = determinantTest(rowsCount, rowsCount, table);//работает быстрее, чем просто determinant
 	//omp_set_num_threads(8);
-	auto multi = determinantMultithread(rowsCount, rowsCount, table);
+	//auto multi = determinantMultithread(rowsCount, rowsCount, table);
 	end_time = omp_get_wtime();
 
 	auto res2 = end_time - start_time;
 
 	//printf("Single: %f\n", single);
 	//printf("Multi: %f\n", multi);
+	printf("Test: %f\n, %f", test, res2);
 	
 	int c = 5;
 
@@ -425,6 +426,10 @@ float determinantTest(int dim, int dimStart, float** matrix)
 
 			resFor = sign * matrix[0][i] * determinantTest(dim - 1, dim, matrixLocal);
 			res += resFor;
+			for (int im = 0; im < dimLoc; im++)
+			{
+				free(matrixLocal[im]);
+			}
 			free(matrixLocal);
 		}
 	}
@@ -502,7 +507,11 @@ float determinantTest(int dim, int dimStart, float** matrix)
 
 				resFor = sign * matrix[0][i] * determinantTest(dim - 1, dim, matrixLocal);
 				resLoc += resFor;
-
+				
+				for (int im = 0; im < dimLoc; im++)
+				{
+					free(matrixLocal[im]);
+				}
 				free(matrixLocal);
 			}
 			
