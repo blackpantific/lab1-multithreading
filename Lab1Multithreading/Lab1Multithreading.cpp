@@ -93,7 +93,7 @@ int main()
 		   }
 	   }*/
 
-	//float start_time, end_time, tick;
+	float start_time, end_time, tick;
 	//start_time = omp_get_wtime();
 	
 	//auto single = determinant(rowsCount, table);
@@ -116,9 +116,13 @@ int main()
 	//printf("Test: %f\n, %f", test, res2);
 	
 	//int c = 5;
-
+	start_time = omp_get_wtime();
 	auto res = determinantNew(0, 0, NULL, rowsCount, rowsCount, table);
-
+	end_time = omp_get_wtime();
+	auto res1 = end_time - start_time;
+	
+	printf("New: %f, %f\n", res, res1);
+	//printf("Test: %f, %f\n", test, res2);
 
 }
 
