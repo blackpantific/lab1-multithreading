@@ -2,6 +2,7 @@
 #include <fstream>
 #include <string>
 #include <omp.h>
+#include "conio.h"
 using namespace std;
 
 float determinant(int dim, float** matrix);
@@ -23,14 +24,21 @@ int main(int argc, char** argv)
 	char* bufIterator;
 	char* buf;
 	float** table;
-	const int NUM_OF_THREADS =atoi(argv[2]);//0
+	int NUM_OF_THREADS = 0;
+
+	/*for (size_t i = 0; i < argc; i++)
+	{
+		printf("%s", argv[i]);
+	}*/
 
 	float** lu;
 	int rowsCount = 0;
 	try
 	{
-		auto file = argv[1];
- 		ifstream in(argv[1], ios::binary);//matrix.txt
+		string sNUM_OF_THREADS = argv[2];
+		NUM_OF_THREADS = atoi(argv[2]);
+		string file = argv[1];
+ 		ifstream in(/*"matrix.txt"*/argv[1], ios::binary);//matrix.txt
 		int size = in.seekg(0, ios::end).tellg();
 		if (size == -1)
 			throw "File is empty";
@@ -153,7 +161,7 @@ int main(int argc, char** argv)
 
 
 
-
+	_getch(); 
 
 	for (int i = 0; i < rowsCount; i++)
 	{
