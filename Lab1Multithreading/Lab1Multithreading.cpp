@@ -21,13 +21,18 @@ float test(void);
 
 int main(int argc, char** argv)
 {
-	char* bufIterator = NULL;
-	char* buf = NULL;
-	float** table = NULL;
+	char* bufIterator;
+	char* buf;
+	float** table;
 	int NUM_OF_THREADS = 0;
-	float** lu = NULL;
+
+	/*for (size_t i = 0; i < argc; i++)
+	{
+		printf("%s", argv[i]);
+	}*/
+
+	float** lu;
 	int rowsCount = 0;
-	
 	try
 	{
 		string sNUM_OF_THREADS = argv[2];
