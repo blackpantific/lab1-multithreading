@@ -133,6 +133,7 @@ int main(int argc, char** argv)
 		{
 			free(table[i]);
 			free(lu[i]);
+			i++;
 		}
 		if(table!=NULL)
 			free(table);
