@@ -21,18 +21,13 @@ float test(void);
 
 int main(int argc, char** argv)
 {
-	char* bufIterator;
-	char* buf;
-	float** table;
+	char* bufIterator = NULL;
+	char* buf = NULL;
+	float** table = NULL;
 	int NUM_OF_THREADS = 0;
-
-	/*for (size_t i = 0; i < argc; i++)
-	{
-		printf("%s", argv[i]);
-	}*/
-
-	float** lu;
+	float** lu = NULL;
 	int rowsCount = 0;
+	
 	try
 	{
 		string sNUM_OF_THREADS = argv[2];
@@ -76,6 +71,7 @@ int main(int argc, char** argv)
 		catch (...)
 		{
 			cout << "File has incorrect data" << endl;
+			free(buf);
 			return 1;
 		}
 		tempString = "";
@@ -124,6 +120,38 @@ int main(int argc, char** argv)
 	catch (const char* msg)
 	{
 		std::cout << msg << std::endl;
+		if(buf!=NULL)
+			free(buf);
+		int i = 0;
+		if(table!=NULL && lu!=NULL)
+		while(table[i]!=NULL)
+		{
+			free(table[i]);
+			free(lu[i]);
+		}
+		if(table!=NULL)
+			free(table);
+		if(lu!=NULL)
+			free(lu);
+		return 1;
+	}
+	catch(...)
+	{
+		std::cout << "Error while creating matrix" << std::endl;
+		if (buf != NULL)
+			free(buf);
+		int i = 0;
+		if (table != NULL && lu != NULL)
+			while (table[i] != NULL)
+			{
+				free(table[i]);
+				free(lu[i]);
+				i++;
+			}
+		if (table != NULL)
+			free(table);
+		if (lu != NULL)
+			free(lu);
 		return 1;
 	}
 
@@ -136,7 +164,7 @@ int main(int argc, char** argv)
 		end_time = omp_get_wtime();
 		auto timeSingle = end_time - start_time;
 		printf("Determinant: %g\n", resSingle);
-		printf("\nTime (%i thread(s)): %f ms\n", NUM_OF_THREADS, timeSingle);
+		printf("\nTime (%i thread(s)): %f ms\n", NUM_OF_THREADS, timeSingle*1000);
 		
 	}else if(NUM_OF_THREADS == 0)
 	{
@@ -145,7 +173,7 @@ int main(int argc, char** argv)
 		end_time = omp_get_wtime();
 		auto timeMulti = end_time - start_time;
 		printf("Determinant: %g\n", resMulti);
-		printf("\nTime (%i thread(s)): %f ms\n", NUM_OF_THREADS, timeMulti);
+		printf("\nTime (%i thread(s)): %f ms\n", NUM_OF_THREADS, timeMulti*1000);
 	}else if(NUM_OF_THREADS >0)
 	{
 		omp_set_num_threads(NUM_OF_THREADS);
@@ -154,14 +182,14 @@ int main(int argc, char** argv)
 		end_time = omp_get_wtime();
 		auto timeMulti = end_time - start_time;
 		printf("Determinant: %g\n", resMulti);
-		printf("\nTime (%i thread(s)): %f ms\n", NUM_OF_THREADS, timeMulti);
+		printf("\nTime (%i thread(s)): %f ms\n", NUM_OF_THREADS, timeMulti*1000);
 	}
 	
 	
 
 
 
-	_getch(); 
+	//_getch(); 
 
 	for (int i = 0; i < rowsCount; i++)
 	{
@@ -197,7 +225,7 @@ long double LUDecompositionMultithread(float** matrix, float** lu, int n)
 
 			//int num = omp_get_num_threads();
 			int j = 0;
-#pragma omp for schedule(static)
+#pragma omp for schedule(dynamic, 4)
 			for (j = i; j < n; j++)
 			{
 				sum = 0;
@@ -205,7 +233,7 @@ long double LUDecompositionMultithread(float** matrix, float** lu, int n)
 					sum += lu[i][k] * lu[k][j];
 				lu[i][j] = matrix[i][j] - sum;
 			}
-#pragma omp for schedule(static)
+#pragma omp for schedule(dynamic, 4)
 			for (j = i + 1; j < n; j++)
 			{
 				sum = 0;
