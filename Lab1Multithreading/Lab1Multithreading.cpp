@@ -21,9 +21,9 @@ float test(void);
 
 int main(int argc, char** argv)
 {
-	char* bufIterator;
-	char* buf;
-	float** table;
+	char* bufIterator = NULL;
+	char* buf = NULL;
+	float** table = NULL;
 	int NUM_OF_THREADS = 0;
 
 	/*for (size_t i = 0; i < argc; i++)
@@ -31,7 +31,7 @@ int main(int argc, char** argv)
 		printf("%s", argv[i]);
 	}*/
 
-	float** lu;
+	float** lu = NULL;
 	int rowsCount = 0;
 	try
 	{
